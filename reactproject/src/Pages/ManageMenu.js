@@ -1,0 +1,130 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useMenu } from "../Context/MenuContext";
+
+const API = "http://localhost:5000/api";
+
+export default function ManageMenu() {
+  const { menu, setMenu } = useMenu();
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null); // This stores the file from your device
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("food");
+
+  // LOAD MENU
+  useEffect(() => {
+    axios.get(`${API}/menu`).then((res) => setMenu(res.data));
+  }, [setMenu]);
+
+  // ADD ITEM
+  function addItem(e) {
+    e.preventDefault();
+
+    if (!image) {
+      alert("Please select an image file from your device.");
+      return;
+    }
+
+    // IMPORTANT: Use FormData for file uploads
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("category", category);
+    formData.append("image", image); // The key "image" must match the backend
+
+    axios
+      .post(`${API}/menu`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        // RESET FORM
+        setName("");
+        setDescription("");
+        setImage(null);
+        setPrice("");
+        setCategory("food");
+        // Clear the file input visually
+        document.getElementById("fileInput").value = "";
+
+        return axios.get(`${API}/menu`);
+      })
+      .then((res) => setMenu(res.data))
+      .catch((err) => console.error("Error adding item:", err));
+  }
+
+  // DELETE ITEM
+  function deleteItem(id) {
+    axios
+      .delete(`${API}/menu/${id}`)
+      .then(() => axios.get(`${API}/menu`))
+      .then((res) => setMenu(res.data))
+      .catch((err) => console.error(err));
+  }
+
+  return (
+    <div className="page">
+      <h2>Manage Menu</h2>
+
+      <form onSubmit={addItem} className="admin-form">
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+
+        {/* FILE INPUT FOR DEVICE UPLOAD */}
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '5px', flex: 1 }}
+          onChange={(e) => setImage(e.target.files[0])}
+          required
+        />
+
+        <input
+          placeholder="Price"
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          required
+        />
+
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="food">Food</option>
+          <option value="drinks">Drink</option>
+        </select>
+
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <button type="submit">Add Item</button>
+      </form>
+
+      <hr />
+
+      <div className="admin-list">
+        {menu.map((item) => (
+          <div key={item.id} className="admin-item" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+            <img 
+              src={`http://localhost:5000${item.image_url}`} 
+              alt={item.name} 
+              style={{ width: '50px', height: '50px', objectFit: 'cover' }} 
+            />
+            <div>
+              <strong>{item.name}</strong> — ${item.price} ({item.category})
+            </div>
+            <button onClick={() => deleteItem(item.id)} style={{ marginLeft: 'auto', color: 'red' }}>Delete</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
