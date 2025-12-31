@@ -19,7 +19,7 @@ export default function Drinks() {
         {drinks.map((item) => (
           <Link to={`/menu/${item.id}`} key={item.id} className="menu-card">
             <img
-              src={`${BACKEND_URL}${item.image_url}`}
+             src={`${process.env.REACT_APP_BACKEND_URL}${item.image_url}`}
               alt={item.name}
               className="menu-image"
             />
