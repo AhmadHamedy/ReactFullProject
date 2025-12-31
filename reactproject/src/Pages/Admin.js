@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api";
+// This will use your Railway URL when deployed and fallback to localhost if the variable is missing
+const API = process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/api` : "http://localhost:5000/api";
 
 function Admin() {
   const [menu, setMenu] = useState([]);
@@ -71,7 +72,8 @@ function Admin() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
         {menu.map((item) => (
           <div key={item.id} style={{ border: "1px solid #ddd", padding: 10 }}>
-            <img src={`http://localhost:5000${item.image_url}`} alt={item.name} style={{ width: "100%", height: "150px", objectFit: "cover" }} />
+            // Dynamically gets the base URL from your .env
+           <img src={`${process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"}${item.image_url}`}  alt={item.name} style={{ width: "100%", height: "150px", objectFit: "cover" }} />
             <h3>{item.name}</h3>
             <p>${item.price}</p>
             <button onClick={() => deleteItem(item.id)} style={{ color: "red" }}>Delete</button>

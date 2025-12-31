@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useMenu } from "../Context/MenuContext";
 
-const API = "http://localhost:5000/api";
+const API = process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/api` : "http://localhost:5000/api";
 
 export default function ManageMenu() {
   const { menu, setMenu } = useMenu();
@@ -114,10 +114,10 @@ export default function ManageMenu() {
         {menu.map((item) => (
           <div key={item.id} className="admin-item" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
             <img 
-              src={`http://localhost:5000${item.image_url}`} 
-              alt={item.name} 
-              style={{ width: '50px', height: '50px', objectFit: 'cover' }} 
-            />
+               src={`${process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"}${item.image_url}`} 
+                alt={item.name} 
+                style={{ width: '50px', height: '50px', objectFit: 'cover' }} 
+/>
             <div>
               <strong>{item.name}</strong> — ${item.price} ({item.category})
             </div>
