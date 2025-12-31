@@ -10,7 +10,7 @@ export default function MenuDetails() {
 
   useEffect(() => {
     axios
-      .get(`${BACKEND_URL}/api/menu/${id}`)
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/menu/${id}`)
       .then((res) => setItem(res.data))
       .catch((err) => console.error(err));
   }, [id]);
@@ -27,7 +27,7 @@ export default function MenuDetails() {
         <h2 className="details-restaurant">Prime Bite</h2>
 
         <img
-          src={`${BACKEND_URL}${item.image_url}`}
+          src={`${process.env.REACT_APP_BACKEND_URL}${item.image_url}`}
           alt={item.name}
           className="details-image"
           onError={(e) => {
