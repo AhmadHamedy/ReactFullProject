@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Login from "./login.js"; // Ensure the filename is exactly 'login.js' or 'Login.js'
+import Login from "./login.js"; 
 
-// API base configuration
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 const API = `${BACKEND_URL}/api`;
 
@@ -14,10 +13,9 @@ function Admin() {
   const [category, setCategory] = useState("food");
   const [image, setImage] = useState(null);
 
-  // Check if token exists in localStorage to set login state
+  // Core login state
   const [logged, setLogged] = useState(!!localStorage.getItem("token"));
 
-  // load menu (publicly available)
   function loadMenu() {
     axios
       .get(`${API}/menu`)
@@ -29,19 +27,10 @@ function Admin() {
     loadMenu();
   }, []);
 
-  // add item (protected route)
   function addItem(e) {
     e.preventDefault();
-
-    if (!logged) {
-      alert("Please login first");
-      return;
-    }
-
-    if (!image) {
-      alert("Please select an image");
-      return;
-    }
+    if (!logged) return alert("Please login first");
+    if (!image) return alert("Please select an image");
 
     const formData = new FormData();
     formData.append("name", name);
@@ -55,7 +44,7 @@ function Admin() {
     axios
       .post(`${API}/menu`, formData, {
         headers: {
-          // Backend middleware expects "Bearer <token>"
+          // Fixed Header Format
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
@@ -71,17 +60,12 @@ function Admin() {
       })
       .catch((err) => {
         console.error(err);
-        alert("Error adding item. Ensure you are logged in correctly.");
+        alert("Error adding item. Your session might have expired.");
       });
   }
 
-  // delete item (protected route)
   function deleteItem(id) {
-    if (!logged) {
-      alert("Please login first");
-      return;
-    }
-
+    if (!logged) return alert("Please login first");
     const token = localStorage.getItem("token");
 
     axios
@@ -104,105 +88,80 @@ function Admin() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Admin Panel</h1>
+      <h1>Manage Menu</h1>
 
-      {/* LOGIN LOGIC: Show Login form if not logged, otherwise show Logout and Admin Form */}
+      {/* LOGIN CHECK: Only show Admin Panel if logged is true */}
       {!logged ? (
-        <div style={{ border: "1px solid #ccc", padding: "20px", borderRadius: "8px", maxWidth: "300px" }}>
-          <h3>Admin Login</h3>
+        <div style={{ 
+          margin: "50px auto", 
+          padding: "30px", 
+          border: "2px solid #007bff", 
+          borderRadius: "12px", 
+          maxWidth: "400px",
+          textAlign: "center"
+        }}>
+          <h2 style={{ marginBottom: "20px" }}>Admin Access Required</h2>
+          {/* This renders your login button and form */}
           <Login setLogged={setLogged} />
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: 20 }}>
-            <span style={{ marginRight: 10, color: "green" }}>● Logged in as Admin</span>
-            <button onClick={logout}>Logout</button>
+          <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "green", fontWeight: "bold" }}>● Admin Session Active</span>
+            <button onClick={logout} style={{ backgroundColor: "#333", color: "white", padding: "8px 15px" }}>
+              Logout
+            </button>
           </div>
 
           <form
             onSubmit={addItem}
-            style={{ display: "flex", gap: 10, flexWrap: "wrap", backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px" }}
+            style={{ 
+                display: "flex", 
+                gap: 15, 
+                flexWrap: "wrap", 
+                backgroundColor: "#f4f4f4", 
+                padding: "25px", 
+                borderRadius: "10px",
+                border: "1px solid #ddd"
+            }}
           >
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <input
-              id="fileInput"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files[0])}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
+            <input type="text" placeholder="Item Name" value={name} onChange={(e) => setName(e.target.value)} required />
+            <input id="fileInput" type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} required />
+            <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} required />
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="food">Food</option>
               <option value="drinks">Drinks</option>
             </select>
-            <textarea
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <button type="submit" style={{ backgroundColor: "#007bff", color: "white", border: "none", padding: "10px 20px", cursor: "pointer" }}>
-              Add Item
+            <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} style={{ width: "100%" }} />
+            <button type="submit" style={{ backgroundColor: "#007bff", color: "white", padding: "12px 25px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+              Add New Item
             </button>
           </form>
+
+          <hr style={{ margin: "40px 0" }} />
+
+          <h2>Current Live Menu</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 20 }}>
+            {menu.map((item) => (
+              <div key={item.id} style={{ border: "1px solid #ddd", padding: 15, borderRadius: "10px", position: "relative" }}>
+                <img
+                  src={`${BACKEND_URL}${item.image_url}`}
+                  alt={item.name}
+                  style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: "6px" }}
+                />
+                <h3>{item.name}</h3>
+                <p style={{ fontWeight: "bold", fontSize: "1.1em" }}>${item.price}</p>
+                <button
+                  onClick={() => deleteItem(item.id)}
+                  style={{ width: "100%", backgroundColor: "#dc3545", color: "white", border: "none", padding: "8px", borderRadius: "4px", marginTop: "10px" }}
+                >
+                  Remove Item
+                </button>
+              </div>
+            ))}
+          </div>
         </>
       )}
-
-      <hr style={{ margin: "40px 0" }} />
-
-      <h2>Current Menu</h2>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: 20
-        }}
-      >
-        {menu.map((item) => (
-          <div
-            key={item.id}
-            style={{ border: "1px solid #ddd", padding: 10, borderRadius: "8px" }}
-          >
-            <img
-              src={`${BACKEND_URL}${item.image_url}`}
-              alt={item.name}
-              style={{
-                width: "100%",
-                height: 150,
-                objectFit: "cover",
-                borderRadius: "4px"
-              }}
-            />
-            <h3>{item.name}</h3>
-            <p style={{ fontWeight: "bold" }}>${item.price}</p>
-            <p style={{ fontSize: "0.9em", color: "#666" }}>{item.category}</p>
-
-            {logged && (
-              <button
-                onClick={() => deleteItem(item.id)}
-                style={{ color: "white", backgroundColor: "red", border: "none", padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
