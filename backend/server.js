@@ -80,16 +80,18 @@ app.post("/api/login", (req, res) => {
   db.query(
     "SELECT * FROM users WHERE email = ?",
     [email],
-    async (err, result) => {
+    (err, result) => {
       if (err) return res.status(500).json(err);
+      
       if (!result.length)
         return res.status(401).json({ message: "Invalid credentials" });
 
       const user = result[0];
-      const match = await bcrypt.compare(password, user.password);
 
-      if (!match)
-        return res.status(401).json({ message: "Invalid credentials" });
+      // CHANGE THIS: Remove bcrypt.compare and use direct comparison
+      if (password !== user.password) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
 
       const token = jwt.sign(
         { id: user.id },
@@ -101,7 +103,6 @@ app.post("/api/login", (req, res) => {
     }
   );
 });
-
 /* =======================
    MENU ROUTES
 ======================= */
