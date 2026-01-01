@@ -6,20 +6,26 @@ const mysql = require("mysql2");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// uploads
+/* =======================
+   uploads
+======================= */
 const uploadPath = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 app.use("/uploads", express.static(uploadPath));
 
-// db
+/* =======================
+   db
+======================= */
 const db = mysql.createConnection({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
@@ -27,7 +33,6 @@ const db = mysql.createConnection({
   database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT
 });
-
 
 db.connect((err) => {
   if (err) {
@@ -37,7 +42,9 @@ db.connect((err) => {
   console.log("✅ MySQL connected");
 });
 
-// multer
+/* =======================
+   multer
+======================= */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) =>
@@ -46,7 +53,60 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// routes
+/* =======================
+   AUTH MIDDLEWARE
+======================= */
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header)
+    return res.status(401).json({ message: "Login required" });
+
+  const token = header.split(" ")[1];
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: "Invalid token" });
+  }
+}
+
+/* =======================
+   LOGIN
+======================= */
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+
+  db.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    async (err, result) => {
+      if (err) return res.status(500).json(err);
+      if (!result.length)
+        return res.status(401).json({ message: "Invalid credentials" });
+
+      const user = result[0];
+      const match = await bcrypt.compare(password, user.password);
+
+      if (!match)
+        return res.status(401).json({ message: "Invalid credentials" });
+
+      const token = jwt.sign(
+        { id: user.id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      res.json({ token });
+    }
+  );
+});
+
+/* =======================
+   MENU ROUTES
+======================= */
+
+// public
 app.get("/api/menu", (req, res) => {
   db.query("SELECT * FROM menu", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -54,6 +114,7 @@ app.get("/api/menu", (req, res) => {
   });
 });
 
+// public
 app.get("/api/menu/:id", (req, res) => {
   db.query(
     "SELECT * FROM menu WHERE id = ?",
@@ -67,8 +128,10 @@ app.get("/api/menu/:id", (req, res) => {
   );
 });
 
-app.post("/api/menu", upload.single("image"), (req, res) => {
+// 🔒 admin only
+app.post("/api/menu", auth, upload.single("image"), (req, res) => {
   const { name, description, price, category = "food" } = req.body;
+
   if (!req.file)
     return res.status(400).json({ message: "Image required" });
 
@@ -84,7 +147,8 @@ app.post("/api/menu", upload.single("image"), (req, res) => {
   );
 });
 
-app.delete("/api/menu/:id", (req, res) => {
+// 🔒 admin only
+app.delete("/api/menu/:id", auth, (req, res) => {
   db.query(
     "DELETE FROM menu WHERE id = ?",
     [req.params.id],
@@ -95,6 +159,9 @@ app.delete("/api/menu/:id", (req, res) => {
   );
 });
 
+/* =======================
+   start server
+======================= */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log("🚀 Server running on port", PORT)

@@ -3,10 +3,12 @@ import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import Home from "./Pages/Home";
 import Food from "./Pages/Food";
+import Login from "./Pages/login";
 import Drinks from "./Pages/Drinks";
 import MenuDetails from "./Pages/MenuDetails";
 import ManageMenu from "./Pages/ManageMenu";
 import { MenuProvider } from "./Context/MenuContext";
+
 
 export default function App() {
   return (
@@ -21,6 +23,7 @@ export default function App() {
             <Route path="/drinks" element={<Drinks />} />
             <Route path="/menu/:id" element={<MenuDetails />} />
             <Route path="/manage" element={<ManageMenu />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
 
           <Footer />
