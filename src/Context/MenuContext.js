@@ -3,7 +3,7 @@ import axios from "axios";
 
 const MenuContext = createContext();
 
-// Use the environment variable or fallback to localhost
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 const API = `${BACKEND_URL}/api`;
 
@@ -11,7 +11,6 @@ export function MenuProvider({ children }) {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. Create a function to fetch the menu that can be called anytime
   const refreshMenu = useCallback(() => {
     setLoading(true);
     axios
@@ -25,13 +24,9 @@ export function MenuProvider({ children }) {
         setLoading(false);
       });
   }, []);
-
-  // Fetch initial data
   useEffect(() => {
     refreshMenu();
   }, [refreshMenu]);
-
-  // 2. Helper function to get filtered categories easily
   const getCategory = (categoryName) => {
     return menu.filter(
       (item) => item.category.toLowerCase() === categoryName.toLowerCase()

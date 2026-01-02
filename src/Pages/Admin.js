@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Login from "./login.js"; 
-// 1. Import the useMenu hook to access global refresh
+
 import { useMenu } from "../Context/MenuContext"; 
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 const API = `${BACKEND_URL}/api`;
 
 function Admin() {
-  // 2. Destructure refreshMenu from your Context
+
   const { refreshMenu } = useMenu();
 
   const [menu, setMenu] = useState([]);
@@ -18,7 +18,6 @@ function Admin() {
   const [category, setCategory] = useState("food");
   const [image, setImage] = useState(null);
 
-  // Core login state
   const [logged, setLogged] = useState(!!localStorage.getItem("token"));
 
   function loadMenu() {
@@ -54,10 +53,10 @@ function Admin() {
         }
       })
       .then(() => {
-        // 3. TRIGGER GLOBAL REFRESH: This updates Food/Drinks pages
+
         refreshMenu(); 
         
-        // Reset form fields
+
         setName("");
         setDescription("");
         setPrice("");
@@ -66,7 +65,7 @@ function Admin() {
         const fileInput = document.getElementById("fileInput");
         if (fileInput) fileInput.value = "";
         
-        loadMenu(); // Refresh local Admin list
+        loadMenu(); 
       })
       .catch((err) => {
         console.error(err);
@@ -85,7 +84,7 @@ function Admin() {
         }
       })
       .then(() => {
-        // 4. TRIGGER GLOBAL REFRESH: Removes item from other pages
+
         refreshMenu(); 
         loadMenu();
       })

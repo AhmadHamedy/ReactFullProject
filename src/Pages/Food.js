@@ -6,15 +6,12 @@ const BASE_URL =
   process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
 export default function Food() {
-  // Pull loading from context to show a spinner/message while fetching
   const { sortedMenu, loading } = useMenu();
 
-  // Filter for food items (using trim and lowercase for safety)
   const foodItems = sortedMenu.filter(
     (item) => item.category?.trim().toLowerCase() === "food"
   );
 
-  // 1. Show loading state
   if (loading) {
     return (
       <div className="page" style={{ textAlign: "center", padding: "50px" }}>
@@ -27,7 +24,7 @@ export default function Food() {
     <div className="page">
       <h2 className="page-title">Prime Bite Food Menu</h2>
 
-      {/* 2. Show message if no items are found */}
+      {}
       {foodItems.length === 0 ? (
         <p style={{ textAlign: "center", color: "gray" }}>
           No food items available at the moment.

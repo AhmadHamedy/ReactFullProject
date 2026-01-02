@@ -14,18 +14,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* =======================
-   uploads
-======================= */
 const uploadPath = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 app.use("/uploads", express.static(uploadPath));
 
-/* =======================
-   db
-======================= */
+
 const db = mysql.createConnection({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
@@ -36,15 +31,13 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error("❌ MySQL error:", err.message);
+    console.error(" MySQL error:", err.message);
     return;
   }
-  console.log("✅ MySQL connected");
+  console.log(" MySQL connected");
 });
 
-/* =======================
-   multer
-======================= */
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) =>
@@ -53,9 +46,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* =======================
-   AUTH MIDDLEWARE
-======================= */
+
 function auth(req, res, next) {
   const header = req.headers.authorization;
   if (!header)
@@ -71,12 +62,10 @@ function auth(req, res, next) {
   }
 }
 
-/* =======================
-   LOGIN
-======================= */
+
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
-  console.log(`Login attempt for: ${email}`); // Debugging
+  console.log(`Login attempt for: ${email}`); 
 
   db.query(
     "SELECT * FROM users WHERE email = ?",
@@ -94,7 +83,6 @@ app.post("/api/login", (req, res) => {
 
       const user = result[0];
 
-      // DIRECT COMPARISON for plain text passwords
       if (password !== user.password) {
         console.log(`Password mismatch: Received ${password}, expected ${user.password}`);
         return res.status(401).json({ message: "Invalid credentials" });
@@ -111,11 +99,7 @@ app.post("/api/login", (req, res) => {
     }
   );
 });
-/* =======================
-   MENU ROUTES
-======================= */
 
-// public
 app.get("/api/menu", (req, res) => {
   db.query("SELECT * FROM menu", (err, result) => {
     if (err) return res.status(500).json(err);
@@ -123,7 +107,7 @@ app.get("/api/menu", (req, res) => {
   });
 });
 
-// public
+
 app.get("/api/menu/:id", (req, res) => {
   db.query(
     "SELECT * FROM menu WHERE id = ?",
@@ -137,7 +121,7 @@ app.get("/api/menu/:id", (req, res) => {
   );
 });
 
-// 🔒 admin only
+
 app.post("/api/menu", auth, upload.single("image"), (req, res) => {
   const { name, description, price, category = "food" } = req.body;
 
@@ -156,7 +140,7 @@ app.post("/api/menu", auth, upload.single("image"), (req, res) => {
   );
 });
 
-// 🔒 admin only
+
 app.delete("/api/menu/:id", auth, (req, res) => {
   db.query(
     "DELETE FROM menu WHERE id = ?",
@@ -168,10 +152,7 @@ app.delete("/api/menu/:id", auth, (req, res) => {
   );
 });
 
-/* =======================
-   start server
-======================= */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
-  console.log("🚀 Server running on port", PORT)
+  console.log(" Server running on port", PORT)
 );

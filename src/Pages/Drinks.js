@@ -6,15 +6,14 @@ const BASE_URL =
   process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
 export default function Drinks() {
-  // Pull sortedMenu and loading from context
+
   const { sortedMenu, loading } = useMenu();
 
-  // Filter for drinks items
   const drinksItems = sortedMenu.filter(
     (item) => item.category?.trim().toLowerCase() === "drinks"
   );
 
-  // 1. Show loading state while fetching from the database
+
   if (loading) {
     return (
       <div className="page" style={{ textAlign: "center", padding: "50px" }}>
@@ -27,7 +26,7 @@ export default function Drinks() {
     <div className="page">
       <h2 className="page-title">Prime Bite Drinks</h2>
 
-      {/* 2. Show message if no drinks are found */}
+      {}
       {drinksItems.length === 0 ? (
         <p style={{ textAlign: "center", color: "gray", marginTop: "20px" }}>
           No drinks available at the moment.

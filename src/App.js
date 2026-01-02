@@ -3,10 +3,10 @@ import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import Home from "./Pages/Home";
 import Food from "./Pages/Food";
-import Login from "./Pages/login"; // Ensure lowercase 'l' matches your file
+import Login from "./Pages/login";
 import Drinks from "./Pages/Drinks";
 import MenuDetails from "./Pages/MenuDetails";
-import Admin from "./Pages/Admin"; // Use Admin to handle the protection logic
+import Admin from "./Pages/Admin";
 import { MenuProvider } from "./Context/MenuContext";
 
 export default function App() {
@@ -21,7 +21,6 @@ export default function App() {
             <Route path="/food" element={<Food />} />
             <Route path="/drinks" element={<Drinks />} />
             <Route path="/menu/:id" element={<MenuDetails />} />
-            {/* Change the route below to Admin */}
             <Route path="/manage" element={<Admin />} />
             <Route path="/login" element={<Login />} />
           </Routes>
