@@ -76,21 +76,28 @@ function auth(req, res, next) {
 ======================= */
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
+  console.log(`Login attempt for: ${email}`); // Debugging
 
   db.query(
     "SELECT * FROM users WHERE email = ?",
     [email],
     (err, result) => {
-      if (err) return res.status(500).json(err);
+      if (err) {
+        console.error("DB Error:", err);
+        return res.status(500).json(err);
+      }
       
-      if (!result.length)
+      if (!result.length) {
+        console.log("User not found in database");
         return res.status(401).json({ message: "Invalid credentials" });
+      }
 
       const user = result[0];
 
-      // CHANGE THIS: Remove bcrypt.compare and use direct comparison
+      // DIRECT COMPARISON for plain text passwords
       if (password !== user.password) {
-        return res.status(401).json({ message: "Invalid password" });
+        console.log(`Password mismatch: Received ${password}, expected ${user.password}`);
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
       const token = jwt.sign(
@@ -99,6 +106,7 @@ app.post("/api/login", (req, res) => {
         { expiresIn: "1d" }
       );
 
+      console.log("Login successful!");
       res.json({ token });
     }
   );
