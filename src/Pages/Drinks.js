@@ -8,9 +8,9 @@ const BASE_URL =
 export default function Drinks() {
   const { sortedMenu } = useMenu();
 
-  const drinks = sortedMenu.filter(
-    (item) => item.category === "drinks"
-  );
+ const drinks = sortedMenu.filter(
+  item => item.category?.trim().toLowerCase() === "drinks"
+);
 
   return (
     <div className="page">

@@ -129,9 +129,10 @@ function Admin() {
             <input id="fileInput" type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} required />
             <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} required />
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              <option value="food">Food</option>
-              <option value="drinks">Drinks</option>
-            </select>
+  <option value="food">Food</option>
+  <option value="drinks">Drinks</option>
+</select>
+
             <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} style={{ width: "100%" }} />
             <button type="submit" style={{ backgroundColor: "#007bff", color: "white", padding: "12px 25px", border: "none", borderRadius: "5px", cursor: "pointer" }}>
               Add New Item

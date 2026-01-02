@@ -8,9 +8,9 @@ const BASE_URL =
 export default function Food() {
   const { sortedMenu } = useMenu();
 
-  const foodItems = sortedMenu.filter(
-    (item) => item.category === "food"
-  );
+ const foodItems = sortedMenu.filter(
+  item => item.category?.trim().toLowerCase() === "food"
+);
 
   return (
     <div className="page">
